@@ -43,8 +43,8 @@ async function search(qp: vscode.QuickPick<MatchItem>, query: string): Promise<M
 }
 
 async function closePopups(): Promise<void> {
-  api.find.quickPick?.hide();
-  api.goto.quickPick?.hide();
+  api.find.close();
+  api.goto.close();
   await sleep(50);
 }
 
@@ -214,6 +214,97 @@ function tests(): void {
       await vscode.commands.executeCommand('intellijFind.openInSearchView');
       await sleep(500);
       assert.strictEqual(api.find.quickPick, undefined);
+    });
+  });
+
+  suite('Replace in Files', () => {
+    const disk = (rel: string) => fs.readFileSync(f(rel).fsPath, 'utf8');
+
+    async function replacePopup(query: string): Promise<vscode.QuickPick<MatchItem>> {
+      await vscode.commands.executeCommand('intellijFind.replaceInFiles', f('replace'));
+      const qp = await waitFor(() => api.find.quickPick, 'replace popup');
+      await search(qp, query);
+      return qp;
+    }
+
+    test('replace mode: title, replacement prompt, Replace All button, ⇧⌘F switches back', async () => {
+      const qp = await replacePopup('alpha');
+      assert.strictEqual(api.find.currentMode, 'replace');
+      assert.match(qp.title!, /^Replace in Files\s+4 matches in 2 files/);
+      assert.match(qp.prompt!, /Replace with: \(not set/);
+      assert.ok(qp.buttons.some((b) => b.tooltip === 'Replace All (⌥A)'));
+      await vscode.commands.executeCommand('intellijFind.findInFiles');
+      await waitFor(() => api.find.currentMode === 'find' && qp.title?.startsWith('Find in Files'), 'find mode');
+      assert.ok(!qp.buttons.some((b) => b.tooltip === 'Replace All (⌥A)'));
+      assert.strictEqual(api.find.quickPick, qp, 'same popup, query kept');
+      assert.strictEqual(qp.value, 'alpha');
+    });
+
+    test('rows preview the replaced line', async () => {
+      const qp = await replacePopup('alpha');
+      api.find.setReplacement('beta');
+      const items = await search(qp, 'alpha');
+      assert.deepStrictEqual(items.map((i) => i.detail), [
+        '→ const beta = 1;', '→ beta(beta);', '→ let betabet = 2;', '→ export function betaFn(x) { return x; }',
+      ]);
+      assert.match(qp.prompt!, /Replace with: beta/);
+    });
+
+    test('⌥↵ replaces the selected occurrence, saves, and refreshes', async () => {
+      const qp = await replacePopup('alpha');
+      api.find.setReplacement('beta');
+      const items = await search(qp, 'alpha');
+      await waitFor(() => qp.activeItems[0] === items[0], 'first row active');
+      api.find.lastSummary = '';
+      await vscode.commands.executeCommand('intellijFind.replaceSelected');
+      await waitFor(() => api.find.lastSummary, 'refresh');
+      assert.strictEqual(disk('replace/one.ts'), 'const beta = 1;\nalpha(alpha);\nlet alphabet = 2;\n');
+      assert.match(qp.title!, /3 matches in 2 files/);
+    });
+
+    test('Replace All: cancel leaves files untouched and the popup open', async () => {
+      const qp = await replacePopup('keepme');
+      api.find.setReplacement('gone');
+      await search(qp, 'keepme');
+      api.find.confirmReplace = async () => false;
+      await vscode.commands.executeCommand('intellijFind.replaceAll');
+      assert.strictEqual(disk('replace/cancel.ts'), 'keepme\n');
+      await waitFor(() => api.find.quickPick, 'popup back');
+    });
+
+    test('Replace All with regex groups replaces every match across files after confirming', async () => {
+      const qp = await replacePopup('alpha(\\w*)');
+      await vscode.commands.executeCommand('intellijFind.toggleRegex');
+      api.find.setReplacement('omega$1');
+      await search(qp, 'alpha(\\w*)');
+      let asked = '';
+      api.find.confirmReplace = async (msg) => { asked = msg; return true; };
+      await vscode.commands.executeCommand('intellijFind.replaceAll');
+      await vscode.commands.executeCommand('intellijFind.toggleRegex');
+      assert.strictEqual(asked, 'Replace 4 occurrences of "alpha(\\w*)" in 2 files with "omega$1"?');
+      assert.strictEqual(disk('replace/one.ts'), 'const beta = 1;\nomega(omega);\nlet omegabet = 2;\n');
+      assert.strictEqual(disk('replace/two.ts'), 'export function omegaFn(x) { return x; }\n');
+      assert.strictEqual(api.find.quickPick, undefined, 'popup closes after Replace All');
+    });
+
+    test('occurrences changed since the search are skipped; unsaved files stay unsaved; one undo reverts', async () => {
+      const doc = await vscode.workspace.openTextDocument(f('replace/three.ts'));
+      const ed = await vscode.window.showTextDocument(doc);
+      await ed.edit((b) => b.replace(new vscode.Range(0, 0, 0, 5), 'GAMMA')); // unsaved edit to the first match
+      const qp = await replacePopup('gamma');
+      await vscode.commands.executeCommand('intellijFind.toggleMatchCase');
+      api.find.setReplacement('delta');
+      await search(qp, 'gamma');
+      api.find.confirmReplace = async () => true;
+      await vscode.commands.executeCommand('intellijFind.replaceAll');
+      await vscode.commands.executeCommand('intellijFind.toggleMatchCase');
+      assert.strictEqual(doc.getText(), 'GAMMA delta\n');
+      assert.ok(doc.isDirty, 'file with unsaved changes is not saved for the user');
+      assert.strictEqual(disk('replace/three.ts'), 'gamma gamma\n');
+      await vscode.window.showTextDocument(doc);
+      await vscode.commands.executeCommand('undo');
+      assert.strictEqual(doc.getText(), 'GAMMA gamma\n');
+      await vscode.commands.executeCommand('workbench.action.files.revert');
     });
   });
 

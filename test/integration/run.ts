@@ -24,6 +24,10 @@ function makeFixture(): void {
   write('node_modules/pkg/index.js', 'needle in node_modules\n');
   write('ignored/secret.txt', 'needle ignored\n');
   write('.gitignore', 'ignored/\n');
+  write('replace/one.ts', 'const alpha = 1;\nalpha(alpha);\nlet alphabet = 2;\n');
+  write('replace/two.ts', 'export function alphaFn(x) { return x; }\n');
+  write('replace/three.ts', 'gamma gamma\n');
+  write('replace/cancel.ts', 'keepme\n');
   execSync('git init -q', { cwd: fixture });
 }
 

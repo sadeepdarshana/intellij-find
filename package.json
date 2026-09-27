@@ -1,8 +1,8 @@
 {
   "name": "intellij-find",
   "displayName": "IntelliJ Find",
-  "description": "IntelliJ-style Find in Files (⇧⌘F) and Go to File (⇧⌘N) popups with live results, preview, and explorer-scoped search.",
-  "version": "0.1.1",
+  "description": "IntelliJ-style Find in Files (⇧⌘F), Replace in Files (⇧⌘R) and Go to File (⇧⌘N) popups with live results, preview, and explorer-scoped search.",
+  "version": "0.2.0",
   "publisher": "SadeepWeerasinghe",
   "license": "MIT",
   "repository": {
@@ -29,6 +29,8 @@
     "intellij",
     "jetbrains",
     "find in files",
+    "replace in files",
+    "replace in path",
     "find in path",
     "go to file",
     "search",
@@ -46,6 +48,12 @@
         "title": "Find in Files…",
         "category": "IntelliJ Find",
         "icon": "$(search)"
+      },
+      {
+        "command": "intellijFind.replaceInFiles",
+        "title": "Replace in Files…",
+        "category": "IntelliJ Find",
+        "icon": "$(replace)"
       },
       {
         "command": "intellijFind.gotoFile",
@@ -72,6 +80,16 @@
         "command": "intellijFind.openInSearchView",
         "title": "Open Results in Search View",
         "category": "IntelliJ Find"
+      },
+      {
+        "command": "intellijFind.replaceAll",
+        "title": "Replace All",
+        "category": "IntelliJ Find"
+      },
+      {
+        "command": "intellijFind.replaceSelected",
+        "title": "Replace Selected Occurrence",
+        "category": "IntelliJ Find"
       }
     ],
     "keybindings": [
@@ -84,6 +102,20 @@
         "command": "intellijFind.findInFiles",
         "key": "ctrl+shift+f",
         "mac": "cmd+shift+f",
+        "args": {
+          "fromExplorer": true
+        },
+        "when": "filesExplorerFocus && !inputFocus"
+      },
+      {
+        "command": "intellijFind.replaceInFiles",
+        "key": "ctrl+shift+r",
+        "mac": "cmd+shift+r"
+      },
+      {
+        "command": "intellijFind.replaceInFiles",
+        "key": "ctrl+shift+r",
+        "mac": "cmd+shift+r",
         "args": {
           "fromExplorer": true
         },
@@ -141,6 +173,16 @@
         "key": "ctrl+enter",
         "mac": "cmd+enter",
         "when": "inQuickOpen && intellijFind.findPopupVisible"
+      },
+      {
+        "command": "intellijFind.replaceAll",
+        "key": "alt+a",
+        "when": "inQuickOpen && intellijFind.findPopupVisible && intellijFind.replaceMode"
+      },
+      {
+        "command": "intellijFind.replaceSelected",
+        "key": "alt+enter",
+        "when": "inQuickOpen && intellijFind.findPopupVisible && intellijFind.replaceMode"
       }
     ],
     "menus": {
@@ -150,8 +192,12 @@
           "group": "4_search@0"
         },
         {
-          "command": "intellijFind.gotoFile",
+          "command": "intellijFind.replaceInFiles",
           "group": "4_search@1"
+        },
+        {
+          "command": "intellijFind.gotoFile",
+          "group": "4_search@2"
         }
       ],
       "editor/title/context": [
@@ -161,8 +207,13 @@
           "when": "resourceScheme == file"
         },
         {
-          "command": "intellijFind.gotoFile",
+          "command": "intellijFind.replaceInFiles",
           "group": "4_search@1",
+          "when": "resourceScheme == file"
+        },
+        {
+          "command": "intellijFind.gotoFile",
+          "group": "4_search@2",
           "when": "resourceScheme == file"
         }
       ],
@@ -171,24 +222,37 @@
           "command": "intellijFind.findInFiles",
           "group": "4_search@0",
           "when": "editorHasSelection"
+        },
+        {
+          "command": "intellijFind.replaceInFiles",
+          "group": "4_search@1",
+          "when": "editorHasSelection"
         }
       ],
       "commandPalette": [
         {
           "command": "intellijFind.toggleMatchCase",
-          "when": "intellijFind.findPopupVisible"
+          "when": "false"
         },
         {
           "command": "intellijFind.toggleWords",
-          "when": "intellijFind.findPopupVisible"
+          "when": "false"
         },
         {
           "command": "intellijFind.toggleRegex",
-          "when": "intellijFind.findPopupVisible"
+          "when": "false"
         },
         {
           "command": "intellijFind.openInSearchView",
-          "when": "intellijFind.findPopupVisible"
+          "when": "false"
+        },
+        {
+          "command": "intellijFind.replaceAll",
+          "when": "false"
+        },
+        {
+          "command": "intellijFind.replaceSelected",
+          "when": "false"
         }
       ]
     },
@@ -218,7 +282,7 @@
     "test:integration": "npm run build && node esbuild.mjs --tests && node out/test/run.js",
     "test": "npm run typecheck && npm run test:unit && npm run test:integration",
     "package": "vsce package --no-dependencies",
-    "install-local": "npm run package && code --install-extension intellij-find-0.1.1.vsix --force",
+    "install-local": "npm run package && code --install-extension intellij-find-0.2.0.vsix --force",
     "publish": "vsce publish --no-dependencies",
     "screenshots": "npm run build && node esbuild.mjs --tests && SHOTS_THEME=dark node out/test/shots-run.js && SHOTS_THEME=light node out/test/shots-run.js && python3 test/screenshots/crop.py"
   },

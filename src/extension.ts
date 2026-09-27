@@ -25,6 +25,11 @@ export function activate(ctx: vscode.ExtensionContext): Api {
     rememberDirs(scope);
     await find.show(scope);
   });
+  reg('intellijFind.replaceInFiles', async (arg?: unknown, multi?: unknown) => {
+    const scope = await scopeFromInvocation(arg, multi);
+    rememberDirs(scope);
+    await find.show(scope, 'replace');
+  });
   reg('intellijFind.gotoFile', async (arg?: unknown, multi?: unknown) => {
     const scope = await scopeFromInvocation(arg, multi);
     rememberDirs(scope);
@@ -34,6 +39,8 @@ export function activate(ctx: vscode.ExtensionContext): Api {
   reg('intellijFind.toggleWords', () => find.toggle('word'));
   reg('intellijFind.toggleRegex', () => find.toggle('regex'));
   reg('intellijFind.openInSearchView', () => find.openInSearchView());
+  reg('intellijFind.replaceAll', () => find.replaceAll());
+  reg('intellijFind.replaceSelected', () => find.replaceSelected());
 
   return { find, goto };
 }

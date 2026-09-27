@@ -58,7 +58,7 @@ export class GotoFilePopup implements vscode.Disposable {
   private useExcludes: boolean;
   private entries: FileEntry[] = [];
   private loadSeq = 0;
-  private suspended = false;
+  private expectedHides = 0;
   private debounce?: NodeJS.Timeout;
   private subs: vscode.Disposable[] = [];
   private scopeButton?: vscode.QuickInputButton;
@@ -91,9 +91,9 @@ export class GotoFilePopup implements vscode.Disposable {
         qp.onDidTriggerButton((b) => this.onButton(b)),
         qp.onDidTriggerItemButton((e) => {
           if (e.button === OPEN_TO_SIDE) this.open(e.item, true);
-          if (e.button === REVEAL) { this.qp?.hide(); void vscode.commands.executeCommand('revealInExplorer', e.item.entry.uri); }
+          if (e.button === REVEAL) { this.close(); void vscode.commands.executeCommand('revealInExplorer', e.item.entry.uri); }
         }),
-        qp.onDidHide(() => this.onHide()),
+        qp.onDidHide(() => this.onDidHide(qp)),
       );
       qp.show();
       setBusyContext(CONTEXT_KEY, true);
@@ -129,13 +129,12 @@ export class GotoFilePopup implements vscode.Disposable {
       this.render();
       this.lastUpdate = this.load();
     } else if (b === this.scopeButton && this.qp) {
-      this.suspended = true;
+      this.expectedHides++; // the scope picker replaces us; that hide must not close the popup
       this.qp.hide();
       try {
         const s = await pickScope(this.scope);
         if (s) this.scope = s;
       } finally {
-        this.suspended = false;
         this.render();
         this.qp?.show();
         this.lastUpdate = this.load();
@@ -212,7 +211,7 @@ export class GotoFilePopup implements vscode.Disposable {
 
   private open(item: FileItem, toSide: boolean): void {
     const q = parseQuery(this.qp?.value ?? '');
-    this.qp?.hide();
+    this.close();
     const e = item.entry;
     if (e.isDir) {
       void vscode.commands.executeCommand('revealInExplorer', e.uri);
@@ -226,18 +225,26 @@ export class GotoFilePopup implements vscode.Disposable {
     void vscode.commands.executeCommand('vscode.open', e.uri, opts);
   }
 
-  private onHide(): void {
-    if (this.suspended) return;
+  private onDidHide(qp: vscode.QuickPick<FileItem>): void {
+    if (qp !== this.qp) return; // late event from a popup we already closed
+    if (this.expectedHides > 0) { this.expectedHides--; return; }
+    this.close();
+  }
+
+  close(): void {
+    const qp = this.qp;
+    if (!qp) return;
+    this.qp = undefined;
+    this.expectedHides = 0;
     clearTimeout(this.debounce);
     this.subs.forEach((s) => s.dispose());
     this.subs = [];
-    this.qp?.dispose();
-    this.qp = undefined;
+    qp.dispose();
     this.entries = [];
     setBusyContext(CONTEXT_KEY, false);
   }
 
   dispose(): void {
-    this.qp?.hide();
+    this.close();
   }
 }

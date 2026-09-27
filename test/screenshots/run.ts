@@ -42,7 +42,7 @@ fs.writeFileSync(path.join(userData, 'User', 'settings.json'), JSON.stringify({
 }, null, 2));
 
 const PORT = 9339;
-const outDir = path.join(root, 'media', 'screenshots');
+const outDir = process.env.SHOTS_OUT ?? path.join(root, 'media', 'screenshots');
 fs.mkdirSync(outDir, { recursive: true });
 
 /** Capture the workbench page via the Chrome DevTools Protocol (read-only; no input is sent). */
@@ -87,5 +87,5 @@ runTests({
   extensionDevelopmentPath: root,
   extensionTestsPath: path.join(root, 'out', 'test', 'shots.js'),
   launchArgs: [demo, `--remote-debugging-port=${PORT}`, '--extensions-dir', path.join(base, 'extensions'), '--user-data-dir', userData, '--skip-welcome', '--skip-release-notes'],
-  extensionTestsEnv: { SHOTS_SIGNAL: signal },
+  extensionTestsEnv: { SHOTS_SIGNAL: signal, SHOTS_SCENES: process.env.SHOTS_SCENES ?? '', SHOTS_ALIGN: process.env.SHOTS_ALIGN ?? '' },
 }).catch((e) => { console.error(e); process.exit(1); });

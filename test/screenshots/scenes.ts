@@ -20,10 +20,14 @@ async function waitFor<T>(fn: () => T | undefined | false, timeout = 10000): Pro
   }
 }
 
+/** SHOTS_SCENES=a,b limits which scenes run (default: the README ones). */
+const only = (process.env.SHOTS_SCENES || 'find-in-files,go-to-file').split(',');
+
 async function scene(name: string, stage: () => Promise<void>): Promise<void> {
+  if (!only.includes(name)) return;
   await stage();
   // Center the popup in the window (VS Code's "Align Quick Input Center"), IntelliJ-style.
-  await cmd('workbench.action.alignQuickInputCenter');
+  await cmd(process.env.SHOTS_ALIGN === 'top' ? 'workbench.action.alignQuickInputTop' : 'workbench.action.alignQuickInputCenter');
   await sleep(700);
   fs.writeFileSync(path.join(signal, `ready-${name}`), '');
   await waitFor(() => fs.existsSync(path.join(signal, `next-${name}`)), 600000);
@@ -31,8 +35,8 @@ async function scene(name: string, stage: () => Promise<void>): Promise<void> {
   for (let i = 0; i < 3; i++) {
     await cmd('workbench.action.closeQuickOpen');
     await sleep(300);
-    api.find.quickPick?.hide();
-    api.goto.quickPick?.hide();
+    api.find.close();
+    api.goto.close();
     await sleep(300);
   }
 }
@@ -74,6 +78,17 @@ export async function run(): Promise<void> {
 
   await scene('go-to-file', async () => {
     await gotoQuery('fi');
+  });
+
+  await scene('replace-in-files', async () => {
+    await cmd('intellijFind.replaceInFiles');
+    const qp = await waitFor(() => api.find.quickPick);
+    api.find.setReplacement('win');
+    qp.value = 'vscode.window';
+    api.find.lastSummary = '';
+    api.find.requery();
+    await waitFor(() => api.find.lastSummary);
+    await down(5);
   });
 
   fs.writeFileSync(path.join(signal, 'ready-last'), '');

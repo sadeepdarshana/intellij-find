@@ -1,8 +1,8 @@
 # IntelliJ Find
 
-IntelliJ-style **Find in Files** (`⇧⌘F`) and **Go to File** (`⇧⌘N`) for VS Code, as centered popups.
+IntelliJ-style **Find in Files** (`⇧⌘F`), **Replace in Files** (`⇧⌘R`) and **Go to File** (`⇧⌘N`) for VS Code, as centered popups.
 
-> These shortcuts replace VS Code's defaults (`⇧⌘F` Search view, `⇧⌘N` New Window). The Search view is still one click away via *Open in Search View* (`⌘↵`) in the popup; to keep a default, remove the binding in *Keyboard Shortcuts*.
+> These shortcuts replace VS Code's defaults (`⇧⌘F` Search view, `⇧⌘N` New Window; on Windows/Linux `Ctrl+Shift+R` is normally *Refactor…*). The Search view is still one click away via *Open in Search View* (`⌘↵`) in the popup; to keep a default, remove the binding in *Keyboard Shortcuts*.
 
 ## Find in Files — `⇧⌘F` / `Ctrl+Shift+F`
 
@@ -14,6 +14,17 @@ IntelliJ-style **Find in Files** (`⇧⌘F`) and **Go to File** (`⇧⌘N`) for 
 
 ![Find in Files, dark theme](media/screenshots/find-in-files-dark.png)
 ![Find in Files, light theme](media/screenshots/find-in-files-light.png)
+
+## Replace in Files — `⇧⌘R` / `Ctrl+Shift+R`
+
+The Find in Files popup in replace mode (same search, toggles, mask and scope). `⇧⌘F` / `⇧⌘R` switch between the two.
+
+- Type the search, then press `⇧⌘R` again (or the ⟳ button) to set the replacement. Selecting text first and pressing `⇧⌘R` jumps straight to the replacement.
+- Each row previews the result (`→ replaced line`); the editor behind shows the old text struck through with the replacement inline.
+- `⌥↵` (or the row's ⟳ button) replaces that line's occurrences; `⌥A` (or the Replace All button) replaces **every** match in scope after a confirmation with the count.
+- Regex mode supports `$1`, `$<name>`, `$&` and `\n` in the replacement.
+- Safe by default: each occurrence is re-checked against the current file text and skipped if it changed since the search. Files without unsaved changes are saved; files you're editing are left unsaved. The whole replacement is a single undo step.
+- `⌘↵` hands the search and replacement to VS Code's Search view for a diff-style review.
 
 ## Go to File — `⇧⌘N` / `Ctrl+Shift+N`
 
@@ -27,8 +38,8 @@ IntelliJ-style **Find in Files** (`⇧⌘F`) and **Go to File** (`⇧⌘N`) for 
 
 ## Scoping to a directory
 
-- **Keyboard:** with the Explorer focused, `⇧⌘F` / `⇧⌘N` search the selected folder (a selected file means its parent folder; multi-select works).
-- **Right-click:** *Find in Files…* and *Go to File…* in the Explorer context menu and the editor tab context menu. *Find in Files…* also appears in the editor context menu when text is selected.
+- **Keyboard:** with the Explorer focused, `⇧⌘F` / `⇧⌘R` / `⇧⌘N` work on the selected folder (a selected file means its parent folder; multi-select works).
+- **Right-click:** *Find in Files…*, *Replace in Files…* and *Go to File…* in the Explorer context menu and the editor tab context menu. *Find in Files…* and *Replace in Files…* also appear in the editor context menu when text is selected.
 - The scope is shown under the input and can be changed from the folder button.
 
 
