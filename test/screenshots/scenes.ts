@@ -22,6 +22,8 @@ async function waitFor<T>(fn: () => T | undefined | false, timeout = 10000): Pro
 
 async function scene(name: string, stage: () => Promise<void>): Promise<void> {
   await stage();
+  // Center the popup in the window (VS Code's "Align Quick Input Center"), IntelliJ-style.
+  await cmd('workbench.action.alignQuickInputCenter');
   await sleep(700);
   fs.writeFileSync(path.join(signal, `ready-${name}`), '');
   await waitFor(() => fs.existsSync(path.join(signal, `next-${name}`)), 600000);
@@ -66,52 +68,12 @@ export async function run(): Promise<void> {
   await sleep(1500);
 
   await scene('find-in-files', async () => {
-    await findQuery('scope');
-    await down(4);
-  });
-
-  await scene('find-directory-regex', async () => {
-    await cmd('revealInExplorer', f('src'));
-    const st = (api.find as any).state;
-    st.regex = true; st.caseSensitive = true;
-    await findQuery('show\\w*\\(', f('src'));
-    await down(2);
+    await findQuery('vscode.window');
+    await down(5);
   });
 
   await scene('go-to-file', async () => {
-    const st = (api.find as any).state;
-    st.regex = false; st.caseSensitive = false;
     await gotoQuery('fi');
-  });
-
-  await scene('go-to-file-path', async () => {
-    await gotoQuery('te/in/');
-  });
-
-  await scene('go-to-file-recent', async () => {
-    for (const p of ['src/scope.ts', 'src/rg.ts', 'src/gotoFile.ts', 'README.md', 'src/findInFiles.ts']) {
-      await vscode.window.showTextDocument(f(p), { preview: false });
-      await sleep(150);
-    }
-    await gotoQuery('');
-  });
-
-  await scene('scope-picker', async () => {
-    await findQuery('rememberDirs', f('src'));
-    void (api.find as any).onButton((api.find.quickPick!.buttons as vscode.QuickInputButton[]).find((b) => b.tooltip?.startsWith('Scope')));
-    await sleep(600);
-  });
-
-  await scene('editor-context-menu', async () => {
-    await sleep(1200); // let the previous popup's editor restore settle
-    const doc = await vscode.workspace.openTextDocument(f('src/scope.ts'));
-    const i = doc.getText().indexOf('scopeFromInvocation');
-    const sel = new vscode.Selection(doc.positionAt(i), doc.positionAt(i + 'scopeFromInvocation'.length));
-    const ed = await vscode.window.showTextDocument(doc, { preview: false, selection: sel });
-    ed.revealRange(sel, vscode.TextEditorRevealType.InCenter);
-    await waitFor(() => !vscode.window.activeTextEditor?.selection.isEmpty);
-    await sleep(400);
-    await cmd('editor.action.showContextMenu');
   });
 
   fs.writeFileSync(path.join(signal, 'ready-last'), '');

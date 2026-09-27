@@ -6,6 +6,7 @@ import { runTests } from '@vscode/test-electron';
 // Stages each README screenshot in a clean, maximized VS Code window. The scenes script
 // writes `<signal>/ready-<name>` and waits for `<signal>/next-<name>` before moving on.
 const root = path.resolve(__dirname, '../..');
+const theme = process.env.SHOTS_THEME === 'light' ? 'light' : 'dark';
 const base = path.join(root, '.vscode-test', 'shots');
 const demo = path.join(base, 'intellij-find');
 const signal = path.join(base, 'signal');
@@ -14,9 +15,12 @@ const userData = path.join(base, 'user-data');
 fs.rmSync(base, { recursive: true, force: true });
 fs.mkdirSync(signal, { recursive: true });
 execSync(`git clone -q "${root}" "${demo}"`);
+// Keep the demo workspace to the code itself (no screenshots/tooling in the results).
+for (const p of ['media/screenshots', 'test/screenshots']) fs.rmSync(path.join(demo, p), { recursive: true, force: true });
+execSync('git -c user.name=demo -c user.email=demo@example.com commit -qam "demo"', { cwd: demo });
 fs.mkdirSync(path.join(userData, 'User'), { recursive: true });
 fs.writeFileSync(path.join(userData, 'User', 'settings.json'), JSON.stringify({
-  'workbench.colorTheme': 'Default Dark Modern',
+  'workbench.colorTheme': theme === 'light' ? 'Default Light Modern' : 'Default Dark Modern',
   'workbench.startupEditor': 'none',
   'workbench.tips.enabled': false,
   'workbench.secondarySideBar.defaultVisibility': 'hidden',
@@ -28,7 +32,13 @@ fs.writeFileSync(path.join(userData, 'User', 'settings.json'), JSON.stringify({
   'git.openRepositoryInParentFolders': 'never',
   'update.mode': 'none',
   'extensions.ignoreRecommendations': true,
-  'window.menuStyle': 'custom', // DOM-rendered menus so they appear in page captures
+  // Native title bar lives outside the page, so captures skip the "[Extension Development Host]" title.
+  'window.titleBarStyle': 'native',
+  'window.commandCenter': false,
+  'workbench.layoutControl.enabled': false,
+  'workbench.navigationControl.enabled': false,
+  'scm.countBadge': 'off',
+  'git.enableStatusBarSync': false,
 }, null, 2));
 
 const PORT = 9339;
@@ -50,7 +60,7 @@ async function capture(name: string): Promise<void> {
     ws.send(JSON.stringify({ id: 1, method: 'Page.captureScreenshot', params: { format: 'png' } }));
   });
   ws.close();
-  fs.writeFileSync(path.join(outDir, `${name}.png`), Buffer.from(data, 'base64'));
+  fs.writeFileSync(path.join(outDir, `${name}-${theme}.png`), Buffer.from(data, 'base64'));
   console.log(`captured ${name}`);
 }
 

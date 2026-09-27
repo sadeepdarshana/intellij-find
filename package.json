@@ -220,7 +220,7 @@
     "package": "vsce package --no-dependencies",
     "install-local": "npm run package && code --install-extension intellij-find-0.1.1.vsix --force",
     "publish": "vsce publish --no-dependencies",
-    "screenshots": "npm run build && node esbuild.mjs --tests && node out/test/shots-run.js && python3 test/screenshots/crop.py"
+    "screenshots": "npm run build && node esbuild.mjs --tests && SHOTS_THEME=dark node out/test/shots-run.js && SHOTS_THEME=light node out/test/shots-run.js && python3 test/screenshots/crop.py"
   },
   "devDependencies": {
     "@types/mocha": "^10.0.10",

@@ -2,7 +2,7 @@
 
 ## 0.1.1
 
-- Screenshots and source repository link on the Marketplace page.
+- Screenshots (light and dark) and source repository link on the Marketplace page.
 - Scope picker: the workspace root shows as its folder name and is no longer offered as a "parent" directory.
 
 ## 0.1.0
