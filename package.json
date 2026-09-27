@@ -3,7 +3,7 @@
   "displayName": "IntelliJ Find",
   "description": "IntelliJ-style Find in Files (⇧⌘F) and Go to File (⇧⌘N) popups with live results, preview, and explorer-scoped search.",
   "version": "0.1.0",
-  "publisher": "sadeepdarshana",
+  "publisher": "SadeepWeerasinghe",
   "license": "MIT",
   "icon": "media/icon.png",
   "galleryBanner": {
