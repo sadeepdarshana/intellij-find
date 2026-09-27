@@ -1,0 +1,100 @@
+{
+  "name": "intellij-find",
+  "displayName": "IntelliJ Find",
+  "description": "IntelliJ-style Find in Files (⇧⌘F) and Go to File (⇧⌘N) popups, scoped to the explorer selection.",
+  "version": "0.1.0",
+  "publisher": "sadeepdarshana",
+  "license": "UNLICENSED",
+  "private": true,
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/sadeepdarshana/intellij-find.git"
+  },
+  "engines": {
+    "vscode": "^1.110.0"
+  },
+  "categories": ["Other"],
+  "keywords": ["intellij", "find in files", "find in path", "go to file", "search"],
+  "activationEvents": ["onStartupFinished"],
+  "main": "./out/extension.js",
+  "contributes": {
+    "commands": [
+      { "command": "intellijFind.findInFiles", "title": "Find in Files…", "category": "IntelliJ Find", "icon": "$(search)" },
+      { "command": "intellijFind.gotoFile", "title": "Go to File…", "category": "IntelliJ Find", "icon": "$(go-to-file)" },
+      { "command": "intellijFind.toggleMatchCase", "title": "Toggle Match Case", "category": "IntelliJ Find" },
+      { "command": "intellijFind.toggleWords", "title": "Toggle Words", "category": "IntelliJ Find" },
+      { "command": "intellijFind.toggleRegex", "title": "Toggle Regex", "category": "IntelliJ Find" },
+      { "command": "intellijFind.openInSearchView", "title": "Open Results in Search View", "category": "IntelliJ Find" }
+    ],
+    "keybindings": [
+      { "command": "intellijFind.findInFiles", "key": "ctrl+shift+f", "mac": "cmd+shift+f" },
+      { "command": "intellijFind.findInFiles", "key": "ctrl+shift+f", "mac": "cmd+shift+f", "args": { "fromExplorer": true }, "when": "filesExplorerFocus && !inputFocus" },
+      { "command": "intellijFind.gotoFile", "key": "ctrl+shift+n", "mac": "cmd+shift+n" },
+      { "command": "intellijFind.gotoFile", "key": "ctrl+shift+n", "mac": "cmd+shift+n", "args": { "fromExplorer": true }, "when": "filesExplorerFocus && !inputFocus" },
+
+      { "command": "intellijFind.toggleMatchCase", "key": "alt+c", "when": "inQuickOpen && intellijFind.findPopupVisible" },
+      { "command": "intellijFind.toggleWords", "key": "alt+w", "when": "inQuickOpen && intellijFind.findPopupVisible" },
+      { "command": "intellijFind.toggleRegex", "key": "alt+x", "when": "inQuickOpen && intellijFind.findPopupVisible" },
+      { "command": "intellijFind.toggleMatchCase", "key": "alt+c", "mac": "alt+cmd+c", "when": "inQuickOpen && intellijFind.findPopupVisible" },
+      { "command": "intellijFind.toggleWords", "key": "alt+w", "mac": "alt+cmd+w", "when": "inQuickOpen && intellijFind.findPopupVisible" },
+      { "command": "intellijFind.toggleRegex", "key": "alt+r", "mac": "alt+cmd+r", "when": "inQuickOpen && intellijFind.findPopupVisible" },
+      { "command": "intellijFind.openInSearchView", "key": "ctrl+enter", "mac": "cmd+enter", "when": "inQuickOpen && intellijFind.findPopupVisible" }
+    ],
+    "menus": {
+      "explorer/context": [
+        { "command": "intellijFind.findInFiles", "group": "4_search@0" },
+        { "command": "intellijFind.gotoFile", "group": "4_search@1" }
+      ],
+      "editor/title/context": [
+        { "command": "intellijFind.findInFiles", "group": "4_search@0", "when": "resourceScheme == file" },
+        { "command": "intellijFind.gotoFile", "group": "4_search@1", "when": "resourceScheme == file" }
+      ],
+      "editor/context": [
+        { "command": "intellijFind.findInFiles", "group": "4_search@0", "when": "editorHasSelection" }
+      ],
+      "commandPalette": [
+        { "command": "intellijFind.toggleMatchCase", "when": "intellijFind.findPopupVisible" },
+        { "command": "intellijFind.toggleWords", "when": "intellijFind.findPopupVisible" },
+        { "command": "intellijFind.toggleRegex", "when": "intellijFind.findPopupVisible" },
+        { "command": "intellijFind.openInSearchView", "when": "intellijFind.findPopupVisible" }
+      ]
+    },
+    "configuration": {
+      "title": "IntelliJ Find",
+      "properties": {
+        "intellijFind.maxResults": {
+          "type": "number",
+          "default": 1000,
+          "minimum": 50,
+          "description": "Maximum number of matching lines shown in the Find in Files popup."
+        },
+        "intellijFind.previewOnNavigate": {
+          "type": "boolean",
+          "default": true,
+          "description": "Preview the highlighted match in the editor while moving through Find in Files results."
+        }
+      }
+    }
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run build -- --prod",
+    "build": "node esbuild.mjs",
+    "watch": "node esbuild.mjs --watch",
+    "typecheck": "tsc --noEmit",
+    "test:unit": "node --test test/unit/*.test.mjs",
+    "test:integration": "npm run build && node esbuild.mjs --tests && node out/test/run.js",
+    "test": "npm run typecheck && npm run test:unit && npm run test:integration",
+    "package": "vsce package --no-dependencies --allow-missing-repository",
+    "install-local": "npm run package && code --install-extension intellij-find-0.1.0.vsix --force"
+  },
+  "devDependencies": {
+    "@types/mocha": "^10.0.10",
+    "@types/node": "^22.0.0",
+    "@types/vscode": "~1.110.0",
+    "@vscode/test-electron": "^2.5.2",
+    "@vscode/vsce": "^3.6.0",
+    "esbuild": "^0.25.0",
+    "mocha": "^11.0.0",
+    "typescript": "^5.9.0"
+  }
+}
