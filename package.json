@@ -2,9 +2,17 @@
   "name": "intellij-find",
   "displayName": "IntelliJ Find",
   "description": "IntelliJ-style Find in Files (⇧⌘F) and Go to File (⇧⌘N) popups with live results, preview, and explorer-scoped search.",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "publisher": "SadeepWeerasinghe",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/sadeepdarshana/intellij-find.git"
+  },
+  "bugs": {
+    "url": "https://github.com/sadeepdarshana/intellij-find/issues"
+  },
+  "homepage": "https://github.com/sadeepdarshana/intellij-find#readme",
   "icon": "media/icon.png",
   "galleryBanner": {
     "color": "#2c2f7d",
@@ -209,9 +217,10 @@
     "test:unit": "node --test test/unit/*.test.mjs",
     "test:integration": "npm run build && node esbuild.mjs --tests && node out/test/run.js",
     "test": "npm run typecheck && npm run test:unit && npm run test:integration",
-    "package": "vsce package --no-dependencies --allow-missing-repository",
-    "install-local": "npm run package && code --install-extension intellij-find-0.1.0.vsix --force",
-    "publish": "vsce publish --no-dependencies --allow-missing-repository"
+    "package": "vsce package --no-dependencies",
+    "install-local": "npm run package && code --install-extension intellij-find-0.1.1.vsix --force",
+    "publish": "vsce publish --no-dependencies",
+    "screenshots": "npm run build && node esbuild.mjs --tests && node out/test/shots-run.js && python3 test/screenshots/crop.py"
   },
   "devDependencies": {
     "@types/mocha": "^10.0.10",

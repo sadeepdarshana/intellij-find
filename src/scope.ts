@@ -87,6 +87,8 @@ export function scopeLabel(s: Scope): string {
 }
 
 export function displayPath(uri: vscode.Uri): string {
+  const root = vscode.workspace.workspaceFolders?.find((f) => f.uri.toString() === uri.toString());
+  if (root) return root.name;
   const rel = vscode.workspace.asRelativePath(uri, (vscode.workspace.workspaceFolders?.length ?? 0) > 1);
   if (rel !== uri.fsPath && rel !== uri.toString()) return rel || '.';
   const home = process.env.HOME;

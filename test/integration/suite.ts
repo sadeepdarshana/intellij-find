@@ -118,6 +118,7 @@ function tests(): void {
       await closePopups();
       const multi = rels(await find('needle', f('README.md'), [f('README.md'), f('src/deep')]));
       assert.strictEqual(multi.length, 8, 'README parent is root, which swallows src/deep');
+      assert.strictEqual(api.find.quickPick!.prompt, 'Directory: fixture', 'workspace root shows as its name, not an absolute path');
     });
 
     test('scope from keybinding while explorer focused (explorer selection) and clipboard restored', async function () {

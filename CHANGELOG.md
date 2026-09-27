@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.1.1
+
+- Screenshots and source repository link on the Marketplace page.
+- Scope picker: the workspace root shows as its folder name and is no longer offered as a "parent" directory.
+
 ## 0.1.0
 
 - Find in Files popup: live ripgrep results, Match Case / Words / Regex, file mask, scope, exclude toggle, history, pin, editor preview, Open in Search View.

@@ -40,7 +40,8 @@ export async function pickScope(current: Scope): Promise<Scope | undefined> {
   if (current.dirs.length === 1) {
     const folder = vscode.workspace.getWorkspaceFolder(current.dirs[0]);
     const parent = vscode.Uri.joinPath(current.dirs[0], '..');
-    if (!folder || parent.path.length >= folder.uri.path.length) addDir(parent, 'parent');
+    // Offer the parent only while it's still inside the workspace folder (the folder root itself is "Whole workspace").
+    if (!folder || parent.path.length > folder.uri.path.length) addDir(parent, 'parent');
   }
   const active = vscode.window.activeTextEditor?.document.uri;
   if (active && active.scheme !== 'untitled') addDir(vscode.Uri.joinPath(active, '..'), 'directory of current file');
