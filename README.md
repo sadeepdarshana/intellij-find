@@ -2,6 +2,8 @@
 
 IntelliJ-style **Find in Files** (`⇧⌘F`) and **Go to File** (`⇧⌘N`) for VS Code, as centered popups.
 
+> These shortcuts replace VS Code's defaults (`⇧⌘F` Search view, `⇧⌘N` New Window). The Search view is still one click away via *Open in Search View* (`⌘↵`) in the popup; to keep a default, remove the binding in *Keyboard Shortcuts*.
+
 ## Find in Files — `⇧⌘F` / `Ctrl+Shift+F`
 
 - Live results as you type (bundled ripgrep), one row per matching line: `line text   path/file.ts 42`, with file-type icons.
@@ -27,6 +29,8 @@ IntelliJ-style **Find in Files** (`⇧⌘F`) and **Go to File** (`⇧⌘N`) for 
 - Follows VS Code's `files.exclude`, `search.exclude`, `search.useIgnoreFiles`, `search.useParentIgnoreFiles`, `search.useGlobalIgnoreFiles` and `search.followSymlinks`. Toggle the *exclude* button to include ignored files (remembered per workspace).
 - Explorer-selection scoping from the keyboard reads the selection via the built-in *Copy Path* command and restores the clipboard's text afterwards (non-text clipboard content is not preserved).
 - Settings: `intellijFind.maxResults` (default 1000), `intellijFind.previewOnNavigate` (default true).
+
+Not affiliated with or endorsed by JetBrains. IntelliJ is a trademark of JetBrains s.r.o.
 
 ## Development
 
